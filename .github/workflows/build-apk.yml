@@ -15,15 +15,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract project ZIP
+      - name: Extract ZIP
         run: |
           mkdir project
           unzip -q Weeqaya_Final_Release.zip -d project
 
-      - name: Find Android project
+      - name: Find Gradle project
         run: |
-          echo "Project contents:"
-          find project -maxdepth 3 -type f | head -100
+          echo "Searching for gradlew..."
+          find project -name gradlew -type f
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -31,17 +31,34 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Make Gradle executable
+      - name: Locate and build APK
         run: |
-          chmod +x project/gradlew
+          GRADLEW=$(find project -name gradlew -type f | head -1)
 
-      - name: Build Debug APK
-        working-directory: project
-        run: ./gradlew assembleDebug --stacktrace
+          if [ -z "$GRADLEW" ]; then
+            echo "ERROR: gradlew not found inside ZIP"
+            echo "ZIP contents:"
+            find project -maxdepth 5 -type f
+            exit 1
+          fi
+
+          echo "Found Gradle wrapper: $GRADLEW"
+
+          chmod +x "$GRADLEW"
+
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          cd "$PROJECT_DIR"
+
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Find APK
+        run: |
+          echo "Searching for APK..."
+          find project -name "*.apk" -type f
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Weeqaya-APK
-          path: project/app/build/outputs/apk/debug/*.apk
+          path: project/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
