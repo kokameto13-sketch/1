@@ -18,9 +18,7 @@ jobs:
 
       - name: Check ZIP file
         run: |
-          echo "========================================"
-          echo "Checking repository files"
-          echo "========================================"
+          echo "Checking repository files..."
           ls -lah
 
           if [ ! -f "Weeqaya_Final_Release_FIXED.zip" ]; then
@@ -28,14 +26,10 @@ jobs:
             exit 1
           fi
 
-          echo "ZIP file found successfully."
+          echo "ZIP file found."
 
       - name: Extract project
         run: |
-          echo "========================================"
-          echo "Extracting project"
-          echo "========================================"
-
           rm -rf project
           mkdir -p project
 
@@ -46,14 +40,9 @@ jobs:
 
       - name: Check Android project
         run: |
-          echo "========================================"
-          echo "Checking Android project"
-          echo "========================================"
-
           if [ ! -f "project/settings.gradle.kts" ]; then
             echo "ERROR: settings.gradle.kts not found"
-            echo "Project structure is:"
-            find project -maxdepth 3 -type f | sort
+            find project -maxdepth 4 -type f | sort
             exit 1
           fi
 
@@ -62,7 +51,7 @@ jobs:
             exit 1
           fi
 
-          echo "Android project structure OK."
+          echo "Android project OK."
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -72,9 +61,6 @@ jobs:
 
       - name: Verify Java
         run: |
-          echo "========================================"
-          echo "Java version"
-          echo "========================================"
           java -version
 
       - name: Install Gradle 8.9
@@ -84,26 +70,9 @@ jobs:
 
       - name: Show Gradle version
         run: |
-          echo "========================================"
-          echo "Gradle version"
-          echo "========================================"
           gradle --version
 
-      - name: Check Kotlin and Java targets
-        working-directory: project
-        run: |
-          echo "========================================"
-          echo "Checking build.gradle.kts"
-          echo "========================================"
-
-          echo "--- app/build.gradle.kts ---"
-          cat app/build.gradle.kts
-
-      - name: Kotlin compilation diagnostic
-        working-directory: project
-        run: |
-          echo "========================================"
-          echo "KOTLIN COMPILATION DIAGNOSTIC"
+      - name: Show          echo "KOTLIN COMPILATION DIAGNOSTIC"
           echo "========================================"
 
           gradle :app:compileDebugKotlin \
